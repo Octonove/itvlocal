@@ -173,3 +173,14 @@ def test_certificado_escapa_html(tmp_path):
     doc.close()
     assert "<script>" in text          # aparece como TEXTO literal, no ejecutado/omitido
     assert "& Co" in text
+
+
+def test_parsear_perfiles_firewall():
+    from itvlocal.checks import parsear_perfiles_firewall as p
+    # salida normal del cmdlet
+    ok = p("Domain|1\nPrivate|1\nPublic|0\n")
+    assert ok == [("Domain", True), ("Private", True), ("Public", False)]
+    # vacia o basura -> None (obliga al fallback, nunca 'activo' por defecto)
+    assert p("") is None
+    assert p("no es un perfil valido") is None
+    assert p("Domain|X") is None

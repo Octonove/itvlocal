@@ -370,7 +370,38 @@ def _nombre_perfil_firewall(linea: str) -> str:
     return "un perfil"
 
 
+def parsear_perfiles_firewall(out: str) -> list[tuple[str, bool]] | None:
+    """Parsea 'Nombre|0/1' (una linea por perfil) de Get-NetFirewallProfile.
+    None si la salida no tiene el formato esperado (cmdlet fallido). PURO."""
+    perfiles: list[tuple[str, bool]] = []
+    for ln in out.splitlines():
+        ln = ln.strip()
+        if not ln or "|" not in ln:
+            continue
+        nombre, _, val = ln.rpartition("|")
+        if val not in ("0", "1") or not nombre:
+            return None
+        perfiles.append((nombre.strip(), val == "1"))
+    return perfiles or None
+
+
+_NOMBRES_PERFIL = {"domain": "dominio", "private": "privado", "public": "publico"}
+
+
 def medir_firewall() -> Punto:
+    # Fuente principal: Get-NetFirewallProfile devuelve BOOLEANOS, independiente
+    # del idioma de Windows. El parseo de texto de netsh (es/en) daba 'activo'
+    # por defecto en Windows fr/de/it aunque el firewall estuviera APAGADO: un
+    # falso seguro firmado en el certificado.
+    out = _pwsh("Get-NetFirewallProfile | ForEach-Object "
+                "{ $_.Name + '|' + [int][bool]$_.Enabled }")
+    perfiles = parsear_perfiles_firewall(out)
+    if perfiles is not None:
+        off = [_NOMBRES_PERFIL.get(n.lower(), n) for n, on in perfiles if not on]
+        return evaluar_firewall(off, consultado=True)
+    # Fallback: netsh (solo fiable en es/en). Si sus lineas tampoco casan con
+    # ningun patron conocido, el resultado es NO CONSULTADO: nunca 'activo'
+    # por defecto.
     root = os.environ.get("SystemRoot", r"C:\Windows")
     netsh = str(Path(root) / "System32" / "netsh.exe")
     out = _pwsh(f"& '{netsh}' advfirewall show allprofiles state")
@@ -378,13 +409,18 @@ def medir_firewall() -> Punto:
         return evaluar_firewall([], consultado=False)
     perfiles_off: list[str] = []
     actual = ""
+    reconocidas = 0
     for ln in out.splitlines():
         low = ln.strip().lower()
         if "perfil" in low or "profile" in low:
             actual = _nombre_perfil_firewall(ln)
-        # 'Estado ... DESACTIVAR/OFF' segun idioma
-        if low.startswith(("estado", "state")) and ("desactiv" in low or low.endswith("off")):
-            perfiles_off.append(actual or "un perfil")
+            reconocidas += 1
+        if low.startswith(("estado", "state")):
+            reconocidas += 1
+            if "desactiv" in low or low.endswith("off"):
+                perfiles_off.append(actual or "un perfil")
+    if reconocidas == 0:
+        return evaluar_firewall([], consultado=False)   # idioma desconocido
     return evaluar_firewall(perfiles_off, consultado=True)
 
 

@@ -10,4 +10,4 @@ negativa, con fecha de proxima revision. Solo inspecciona y documenta: JAMAS
 from __future__ import annotations
 
 APP_NAME = "ITVLocal"
-APP_VERSION = "1.0.1"   # fuente unica de version: build-installer.ps1 la inyecta al .iss
+APP_VERSION = "1.0.2"   # fuente unica de version: build-installer.ps1 la inyecta al .iss

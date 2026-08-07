@@ -428,18 +428,23 @@ def medir_arranque() -> Punto:
                             total += 1
             except OSError:
                 continue
-        # carpetas de Inicio (del usuario y comun), filtrando las deshabilitadas
-        deshab_carpeta = _deshabilitados_startup(
+        # carpetas de Inicio (del usuario y comun), filtrando las deshabilitadas.
+        # El Administrador de tareas marca las de la carpeta del usuario en HKCU
+        # pero las de la carpeta comun (ProgramData) en HKLM\StartupApproved:
+        # sin leer ambos se cuentan como activos programas que YA no arrancan.
+        deshab_usuario = _deshabilitados_startup(
             winreg, winreg.HKEY_CURRENT_USER, base_app + r"\StartupFolder")
-        carpetas = [Path(os.environ.get("APPDATA", "")) /
-                    r"Microsoft\Windows\Start Menu\Programs\Startup",
-                    Path(os.environ.get("ProgramData", r"C:\ProgramData")) /
-                    r"Microsoft\Windows\Start Menu\Programs\StartUp"]
-        for carpeta in carpetas:
+        deshab_comun = deshab_usuario | _deshabilitados_startup(
+            winreg, winreg.HKEY_LOCAL_MACHINE, base_app + r"\StartupFolder")
+        carpetas = [(Path(os.environ.get("APPDATA", "")) /
+                     r"Microsoft\Windows\Start Menu\Programs\Startup", deshab_usuario),
+                    (Path(os.environ.get("ProgramData", r"C:\ProgramData")) /
+                     r"Microsoft\Windows\Start Menu\Programs\StartUp", deshab_comun)]
+        for carpeta, deshab in carpetas:
             if carpeta.is_dir():
                 for f in carpeta.iterdir():
                     if f.suffix.lower() in (".lnk", ".exe", ".bat") and \
-                            f.name.lower() not in deshab_carpeta:
+                            f.name.lower() not in deshab:
                         total += 1
         return evaluar_arranque(total)
     except Exception:  # noqa: BLE001

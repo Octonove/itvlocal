@@ -148,6 +148,19 @@ def test_certificado_sin_puntos_lanza(tmp_path):
         report.exportar_certificado([], v, str(tmp_path / "x.pdf"))
 
 
+def test_ruta_libre_no_pisa_el_certificado_del_dia(tmp_path):
+    # Dos inspecciones el mismo dia ('antes' y 'despues' del plan de accion):
+    # la segunda no debe machacar la evidencia de la primera.
+    p = tmp_path / "ITV_Bar Paco_2026-08-07.pdf"
+    assert report.ruta_libre(p) == p                 # no existe: nombre limpio
+    p.write_bytes(b"antes")
+    p2 = report.ruta_libre(p)
+    assert p2 == tmp_path / "ITV_Bar Paco_2026-08-07_2.pdf"
+    p2.write_bytes(b"despues")
+    assert report.ruta_libre(p) == tmp_path / "ITV_Bar Paco_2026-08-07_3.pdf"
+    assert p.read_bytes() == b"antes"                # el 'antes' sigue intacto
+
+
 def test_certificado_escapa_html(tmp_path):
     import fitz
     p = checks.Punto("x", "<script>alert(1)</script>", estado=GRAVE,

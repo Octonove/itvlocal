@@ -43,6 +43,22 @@ def _rgb(hexcolor: str) -> tuple[float, float, float]:
     return int(c[0:2], 16) / 255, int(c[2:4], 16) / 255, int(c[4:6], 16) / 255
 
 
+def ruta_libre(path: Path) -> Path:
+    """Primer path que NO existe: x.pdf, x_2.pdf, x_3.pdf...
+
+    El nombre del certificado solo lleva la fecha (sin hora), y repetir la
+    inspeccion el mismo dia es el flujo normal (pasar la ITV, aplicar el plan,
+    comprobar la mejora): guardar la segunda machacaba en silencio el
+    certificado 'antes', que es justo la evidencia de los defectos."""
+    if not path.exists():
+        return path
+    for i in range(2, 1000):
+        cand = path.with_stem(f"{path.stem}_{i}")
+        if not cand.exists():
+            return cand
+    return path        # 999 certificados el mismo dia: caso teorico, se rinde
+
+
 def exportar_certificado(puntos: list[Punto], veredicto: Veredicto, out_path: str, *,
                          equipo: str = "", fecha: date | None = None) -> str:
     import fitz

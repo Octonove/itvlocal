@@ -38,10 +38,26 @@ if (-not $iscc) {
     Write-Host "No se encontro Inno Setup (ISCC.exe). winget install JRSoftware.InnoSetup" -ForegroundColor Red
     exit 1
 }
-& $iscc "/DMyAppVersion=$ver" (Join-Path $PSScriptRoot "ITVLocal.iss")
-if ($LASTEXITCODE -eq 0) {
-    Write-Host "`nInstalador: $(Join-Path $root ("installer\ITVLocal-Setup-$ver.exe"))" -ForegroundColor Green
+New-Item -ItemType Directory -Force -Path (Join-Path $root "installer") | Out-Null
+
+# Se compila a una carpeta TEMPORAL (via /O, que pisa el OutputDir del .iss)
+# porque el Windows Search Indexer bloquea intermitentemente installer\ bajo el
+# perfil e Inno falla con "EndUpdateResource failed (110)". Luego se mueve.
+# (Mismo arreglo que CapturaPro, CapturaStudio y GuiaClick.)
+$tmpOut = Join-Path $env:TEMP "ITVLocal_setup_build"
+New-Item -ItemType Directory -Force -Path $tmpOut | Out-Null
+& $iscc "/DMyAppVersion=$ver" "/O$tmpOut" (Join-Path $PSScriptRoot "ITVLocal.iss")
+$code = $LASTEXITCODE
+if ($code -eq 0) {
+    $built = Join-Path $tmpOut "ITVLocal-Setup-$ver.exe"
+    if (-not (Test-Path $built)) {
+        Write-Host "`nNo se encontro el instalador compilado en $tmpOut." -ForegroundColor Red
+        exit 1
+    }
+    $dest = Join-Path $root ("installer\ITVLocal-Setup-$ver.exe")
+    Move-Item -Force -Path $built -Destination $dest
+    Write-Host "`nInstalador: $dest" -ForegroundColor Green
 } else {
-    Write-Host "Fallo el instalador (codigo $LASTEXITCODE)." -ForegroundColor Red
-    exit $LASTEXITCODE
+    Write-Host "Fallo el instalador (codigo $code)." -ForegroundColor Red
+    exit $code
 }

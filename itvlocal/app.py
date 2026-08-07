@@ -27,8 +27,15 @@ class App(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
         self.title(f"{APP_NAME} {APP_VERSION}")
-        self.geometry("880x680")
-        self.minsize(820, 620)
+        # Las fuentes en puntos crecen con el DPI pero una geometry en pixeles
+        # fisicos no: a 125-150% de escalado la ventana fija se quedaba corta y
+        # pack recortaba la botonera inferior. Se escala con el DPI real, con
+        # tope en el tamano de pantalla (el -80 deja hueco a la barra de tareas).
+        f = self.winfo_fpixels("1i") / 96
+        w = min(int(880 * f), self.winfo_screenwidth())
+        h = min(int(680 * f), self.winfo_screenheight() - 80)
+        self.geometry(f"{w}x{h}")
+        self.minsize(min(int(820 * f), w), min(int(620 * f), h))
         theme.apply(self)
         try:
             ico = Path(__file__).resolve().parent.parent / "build" / "icon.ico"
@@ -67,6 +74,20 @@ class App(tk.Tk):
         ttk.Button(top, text="Carpeta de salida…", command=self._set_output_dir).pack(
             side="right", padx=(0, 6))
 
+        # La botonera va con side="bottom" y ANTES que el body: pack recorta
+        # primero al ultimo empaquetado, y si la ventana se queda corta (DPI
+        # alto, pantalla pequena) debe encogerse la tabla, nunca desaparecer
+        # el boton de guardar el certificado.
+        bar = ttk.Frame(self, padding=(16, 10))
+        bar.pack(fill="x", side="bottom")
+        self.btn_pdf = ttk.Button(bar, text="📄 Guardar certificado PDF", style="Primary.TButton",
+                                  command=self._save_pdf, state="disabled")
+        self.btn_pdf.pack(side="right")
+        self.btn_ia = ttk.Button(bar, text="🤖 Explicar con IA", command=self._explicar_ia,
+                                 state="disabled")
+        self.btn_ia.pack(side="right", padx=(0, 6))
+        ttk.Button(bar, text="Abrir carpeta", command=self._open_folder).pack(side="left")
+
         body = ttk.Frame(self, padding=(16, 4))
         body.pack(fill="both", expand=True)
         body.columnconfigure(0, weight=1)
@@ -99,16 +120,6 @@ class App(tk.Tk):
                                    bg=theme.CARD, relief="solid", borderwidth=1,
                                    state="disabled")
         self.txt_detalle.grid(row=2, column=0, sticky="ew", pady=(8, 0))
-
-        bar = ttk.Frame(self, padding=(16, 10))
-        bar.pack(fill="x")
-        self.btn_pdf = ttk.Button(bar, text="📄 Guardar certificado PDF", style="Primary.TButton",
-                                  command=self._save_pdf, state="disabled")
-        self.btn_pdf.pack(side="right")
-        self.btn_ia = ttk.Button(bar, text="🤖 Explicar con IA", command=self._explicar_ia,
-                                 state="disabled")
-        self.btn_ia.pack(side="right", padx=(0, 6))
-        ttk.Button(bar, text="Abrir carpeta", command=self._open_folder).pack(side="left")
 
     # ------------------------------------------------------------ inspeccion
     def _start(self) -> None:
@@ -200,7 +211,8 @@ class App(tk.Tk):
         equipo = self.var_equipo.get().strip()
         safe = "".join(c for c in (equipo or "equipo") if c.isalnum() or c in " -_").strip() or "equipo"
         stamp = datetime.now().strftime("%Y-%m-%d")
-        out = Path(self.cfg.output_dir) / f"ITV_{safe}_{stamp}.pdf"
+        # si ya hay certificado de hoy, se desambigua (_2, _3...): nunca se pisa
+        out = report.ruta_libre(Path(self.cfg.output_dir) / f"ITV_{safe}_{stamp}.pdf")
         try:
             report.exportar_certificado(self.puntos, self.veredicto, str(out), equipo=equipo)
         except Exception as exc:  # noqa: BLE001

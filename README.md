@@ -1,53 +1,54 @@
 # ITVLocal
 
-La **ITV de tu ordenador**, 100% local: pasa una inspección de 1-3 minutos (disco, memoria, actualizaciones, antivirus, copias de seguridad…) y obtén un **certificado PDF** con nota, defectos y plan de acción en español llano — como la ITV del coche: favorable, desfavorable o negativa, con fecha de próxima revisión.
+[![license](https://img.shields.io/github/license/Octonove/itvlocal)](LICENSE)
+[![release](https://img.shields.io/github/v/release/Octonove/itvlocal)](https://github.com/Octonove/itvlocal/releases/latest)
+[![platform](https://img.shields.io/badge/platform-Windows%2010%2F11-1E3A5F)](https://github.com/Octonove/itvlocal/releases/latest)
 
-> ITVLocal **solo inspecciona y documenta**: jamás borra, "limpia" ni cambia nada de tu equipo. No es un optimizador. Y nada sale de tu PC.
+An MOT-style inspection for your PC: 1–3 minutes, a 0–10 score and a PDF certificate. Inspects, never modifies.
 
-## ⬇️ Descargar (Windows 10/11)
+**Free · Open source (MIT) · 100% local — nothing ever leaves your PC · No accounts, no limits, no watermarks**
 
-### ➡️ [**Descargar ITVLocal (instalador .exe)**](https://github.com/Octonove/itvlocal/releases/latest/download/ITVLocal-Setup.exe)
+<img src="docs/screenshot.png" width="720" alt="ITVLocal screenshot">
 
-Descarga **directa** del instalador, sin registro. También puedes ver la [última versión y notas](https://github.com/Octonove/itvlocal/releases/latest).
+> 🇪🇸 ¿Prefieres leerlo en español? → **[README en español](README.es.md)**
 
-> Si Windows muestra *"Windows protegió tu PC"* (es normal en programas nuevos sin firma): pulsa **Más información → Ejecutar de todas formas**. Se instala sin permisos de administrador.
+## Features
 
----
+- Checks disk space & **SMART health**, RAM, Windows updates, antivirus, firewall, startup programs and backups
+- Verdict like a real vehicle inspection: favorable / unfavorable / negative, with a **0–10 score**
+- **PDF certificate** with an action plan in plain language
+- Read-only by design: it never deletes, 'cleans' or changes anything
+- Optional local AI explains the results in plain words
 
-## Qué inspecciona
+## Download (Windows 10/11)
 
-- **Disco**: espacio libre y estado de salud que reporta Windows.
-- **Memoria RAM**: cantidad instalada y carga actual.
-- **Actualizaciones**: cuánto hace del último parche de Windows y si hay reinicio pendiente.
-- **Seguridad**: antivirus activo y al día, cortafuegos por perfil.
-- **Arranque**: cuántos programas se lanzan solos con Windows.
-- **Copia de seguridad**: si se detecta alguna automática (Historial de archivos u OneDrive).
-- **Higiene**: días sin reiniciar y versión de Windows con soporte.
+### ➡️ [**Download ITVLocal (installer .exe)**](https://github.com/Octonove/itvlocal/releases/latest/download/ITVLocal-Setup.exe)
 
-Cada punto se clasifica como en la ITV real — **correcto, defecto leve, grave o muy grave** — y el conjunto da el veredicto (favorable / desfavorable / negativa), la nota 0-10 y la fecha de la próxima inspección. El **certificado PDF** incluye la tabla de puntos con semáforos y el plan de acción ordenado por urgencia: perfecto para enviárselo a tus clientes si eres el informático, o para archivarlo como evidencia de diligencia.
+Direct download, no sign-up. If Windows shows *"Windows protected your PC"* (normal for new unsigned apps): click **More info → Run anyway**. Installs without administrator rights.
 
-- **Explicar con IA** (opcional, [Ollama](https://ollama.com) gratis en tu PC o una API con tu clave): reescribe el plan "como a tu cuñado". Sin IA, la app es 100% funcional.
-- **Recordatorio integrado**: al abrir la app, te avisa si ya toca la siguiente inspección.
+> ⭐ **If ITVLocal is useful to you, a star on GitHub is the best way to support it — it costs nothing and helps a lot.**
 
-## Stack
+## More free local-first tools
 
-Python 3 + Tkinter (ttk) · PyMuPDF (certificado PDF) · ctypes/Win32 + PowerShell de solo lectura · Ollama/API opcional.
+Every tool in this family follows the same rules: free, open source, and nothing leaves your PC.
 
-Depende del paquete compartido de la suite [`octonove-core`](https://github.com/Octonove/octonove-core) (tema, capa IA, config): debe estar en el `sys.path` del entorno (vía `.pth` o copia junto al proyecto).
+| Tool | What it does |
+|---|---|
+| [CapturaPro](https://github.com/Octonove/capturapro) | Screenshots, GIFs and screen recordings for Windows — annotated, watermark-free, 100% local. |
+| [TranscriptorIA](https://github.com/Octonove/transcriptor-ia) | Audio & video to text and .srt subtitles with local Whisper AI — free, private, unlimited. |
+| [PDFLocal](https://github.com/Octonove/pdflocal) | The full PDF toolbox for Windows: merge, split, compress, sign, OCR and chat with your documents — no uploads. |
+| [CajaPDF](https://github.com/Octonove/cajapdf) | The tiny PDF utility: merge, split and compress — free, offline, no accounts. |
+| [CapturaStudio](https://github.com/Octonove/capturastudio) | An OBS-style recording & streaming studio with local AI superpowers — record, stream, auto-edit. |
+| [GuiaClick](https://github.com/Octonove/guiaclick) | Record your clicks, get a step-by-step guide — annotated screenshots, blur, PDF/HTML export. Like Scribe, but local. |
+| [ActaLocal](https://github.com/Octonove/actalocal) | Meetings → minutes: local Whisper transcription plus AI summary, decisions and action items. |
+| [AutoEscritorio](https://github.com/Octonove/autoescritorio) | Trigger→action automation for Windows: watch folders, hotkeys, USB, clipboard — simple and local. |
+| [BalanceLocal](https://github.com/Octonove/balancelocal) | Your work Wrapped: where your time actually goes, as shareable cards, a PDF report and a mini-video. |
+| [CajaNegra](https://github.com/Octonove/cajanegra) | A dashcam for your PC: the last minutes of your screen, one hotkey away from a perfect incident report. |
+| [FichajeLocal](https://github.com/Octonove/fichajelocal) | A local time-clock kiosk for small business: PIN check-in, tamper-evident records, accountant-ready reports. |
+| [SonarArchivo](https://github.com/Octonove/sonararchivo) | Find files by what's INSIDE them: local full-text search over your messy folders and old drives. |
 
-## Compilar
+Also: **[CRBRO](https://github.com/Octonove/crbro-memory)** — persistent neural memory for AI agents (MCP server).
 
-```powershell
-.\build\build.ps1              # ejecutable (PyInstaller onedir)
-.\build\build-installer.ps1    # instalador (Inno Setup)
-```
+## License
 
-## Tests
-
-```powershell
-python -m pytest tests/ -q
-```
-
-## Licencia
-
-[MIT](LICENSE) — © 2026 Octonove.
+[MIT](LICENSE) — see also [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) where present.
